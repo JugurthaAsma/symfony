@@ -10,10 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class homeController extends AbstractController
+class acceuilController extends AbstractController
 {
     /**
-     * @Route("/", name="homeController")
+     * @Route("/", name="acceuilController")
      */
     public function homeAction(): Response
     {
@@ -21,7 +21,7 @@ class homeController extends AbstractController
           'type' => 'admin',
           'name' => 'giles',
         ];
-        return $this->render('home.html.twig', $args);
+        return $this->render('acceuil.html.twig', $args);
     }
 
 }

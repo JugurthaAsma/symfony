@@ -4,7 +4,7 @@
 namespace App\Controller;
 
 
-class usersController
+class utilisateurController
 {
 
 }
