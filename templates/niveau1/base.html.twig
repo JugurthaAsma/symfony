@@ -5,28 +5,21 @@
         <title>{% block title %}Bienvenue!{% endblock %}</title>
 
         {% block stylesheets %}
-
+            <link rel="stylesheet" href="{{ asset('css/base.css') }}">
         {% endblock %}
 
     </head>
     <body>
         {% block body %}
-            {% block header %}
-                <h1>HEADER</h1>
-            {% endblock %}
+            {% block main %}
 
-            {% block actions %}
-                <h1>ACTIONS</h1>
             {% endblock %}
-
-            {% block main %}{% endblock %}
 
             {% block footer %}
-                <h1>FOOTER</h1>
+                <footer>
+                    <h1>FOOTER</h1>
+                </footer>
             {% endblock %}
-
-
-
         {% endblock %}
     </body>
 </html>
