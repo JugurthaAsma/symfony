@@ -5,10 +5,13 @@ namespace App\Entity;
 use App\Repository\UtilisateurRepository;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Table(name="im2021_utilisateurs")
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
+ * @UniqueEntity(fields={"login"}, message="Login déjà existant")
  */
 class Utilisateur
 {
@@ -27,6 +30,8 @@ class Utilisateur
      *     length=30,
      *     options={"comment"="sert de login (doit être unique)"}
      *)
+     * @Assert\NotBlank(message="le login est obligatoire")
+     * @Assert\Length(max="30", maxMessage="le login ne doit pas dépasser les 30 caractères")
      */
     private $login;
 
@@ -37,16 +42,20 @@ class Utilisateur
      *     length=64,
      *     options={"comment"="mot de passe crypté : il faut une taille assez grande pour ne pas le tronquer"}
      *)
+     * @Assert\NotBlank(message="le mot de passe est obligatoire")
+     * @Assert\Length(max="64", maxMessage="le mot de passe ne doit pas dépasser les 64 caractères")
      */
     private $motDePasse;
 
     /**
      * @ORM\Column(type="string", length=30, nullable=true, options={"default"=NULL})
+     * @Assert\Length(max="30", maxMessage="le nom ne doit pas dépasser les 30 caractères")
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=30, nullable=true, options={"default"=NULL})
+     * @Assert\Length(max="30", maxMessage="le prénom ne doit pas dépasser les 30 caractères")
      */
     private $prenom;
 
@@ -57,6 +66,7 @@ class Utilisateur
 
     /**
      * @ORM\Column(name="isadmin", type="boolean", options={"default"=0})
+     * @Assert\Type("bool", message="{{ value }} n'est pas un {{ type }}")
      */
     private $status;
 
@@ -142,7 +152,7 @@ class Utilisateur
         $this->nom = null;
         $this->prenom = null;
         $this->dateDeNaissance = null;
-        $this->status = 0;
+        $this->status = false;
 
     }
 }

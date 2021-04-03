@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table (name="im2021_produits")
@@ -25,11 +26,13 @@ class Produit
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\GreaterThanOrEqual(value=0, message="Le prix doit être supérieur à 0")
      */
     private $prix;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\GreaterThanOrEqual(value=0, message="La quantité doit être supérieur à 0")
      */
     private $quantite;
 

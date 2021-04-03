@@ -19,8 +19,11 @@ class AccueilController extends AbstractController
     public function homeAction(): Response
     {
         $param = $this->getParameter('id');
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        $utilisateur = $utilisateurRepository->find($param);
 
-        if ($param == 0 )
+        if ($param == 0 || !$utilisateur)
         {
             $args = [
                 'nom' => '',
@@ -29,10 +32,6 @@ class AccueilController extends AbstractController
         }
         else
         {
-            $em = $this->getDoctrine()->getManager();
-            $utilisateurRepository = $em->getRepository('App:Utilisateur');
-            $utilisateur = $utilisateurRepository->find($param);
-            dump($utilisateur);
 
             $args = [
                 'nom' => $utilisateur->getLogin(),

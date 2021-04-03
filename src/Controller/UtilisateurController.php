@@ -21,6 +21,7 @@ class UtilisateurController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $produitRepository = $em->getRepository(Produit::class);
 
+
         // get le nombre de produits disponibles
         $nbrProduits = $produitRepository->createQueryBuilder('produits')
             ->select('count(produits.id)')
@@ -28,16 +29,15 @@ class UtilisateurController extends AbstractController
             ->getSingleScalarResult();
 
         $param = $this->getParameter('id');
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        $utilisateur = $utilisateurRepository->find($param);
 
-        if ($param == 0 )
+        if ($param == 0 || !$utilisateur)
         {
             return $this->render('niveau2/anonyme.html.twig', ['nbrProduits' => $nbrProduits]);
         }
         else
         {
-            $em = $this->getDoctrine()->getManager();
-            $utilisateurRepository = $em->getRepository('App:Utilisateur');
-            $utilisateur = $utilisateurRepository->find($param);
 
             if ($utilisateur->getStatus())
                 return $this->render('niveau2/admin.html.twig', ['nbrProduits' => $nbrProduits]);
@@ -51,6 +51,13 @@ class UtilisateurController extends AbstractController
      */
     public function seConnecterAction(): Response
     {
+        $utilisateurRepository = $this->getDoctrine()->getManager()->getRepository('App:Utilisateur');
+
+        if (!$this->getAnonyme($utilisateurRepository))
+        {
+            $this->addFlash('error', 'Seul un anonyme peut se connecter');
+            return $this->redirectToRoute('accueil');
+        }
         return $this->render('niveau3/seConnecter.html.twig');
     }
 
@@ -59,19 +66,48 @@ class UtilisateurController extends AbstractController
      */
     public function seDeconnecterAction(): Response
     {
-
-        $this->addFlash('success', 'Déconnexion avec succès');
+        $utilisateurRepository = $this->getDoctrine()->getManager()->getRepository('App:Utilisateur');
+        if ($this->getAnonyme($utilisateurRepository))
+            $this->addFlash('error', 'Vous n\'êtes même pas connecté' );
+        else
+            $this->addFlash('success', 'Déconnexion avec succès');
         return $this->redirectToRoute('accueil');
     }
 
     /**
      * @Route ("/creerCompte", name="creerCompte")
      */
-    public function creerUnCompteAction(): Response
+    public function creerUnCompteAction(Request $request): Response
     {
+        $em =$this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        if (!$this->getAnonyme($utilisateurRepository))
+        {
+            $this->addFlash('error', 'Seul un anonyme peut se créer un compte');
+            return $this->redirectToRoute('accueil');
+        }
+
         $utilisateur = new Utilisateur();
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
+        $form->remove('status'); // obligatoirement un compte client
         $form->add('send', SubmitType::class, ['label' => 'Créer mon compte']);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $utilisateur->setStatus(false); // obligatoirement un compte client (faille XSS)
+            $utilisateur->setMotDePasse(sha1($utilisateur->getMotDePasse()));
+            $em->persist($utilisateur);
+            $em->flush();
+            $this->addFlash('success', 'Le compte a été créer avec succès');
+            return $this->redirectToRoute('accueil');
+        }
+
+        if ($form->isSubmitted())
+        {
+            $this->addFlash('error', "Erreur, données invalides");
+        }
 
         $args = ['myform' => $form->createView()];
         return $this->render('niveau3/creerCompte.html.twig', $args);
@@ -82,20 +118,12 @@ class UtilisateurController extends AbstractController
      */
     public function modifierProfilAction(Request $request): Response
     {
-        $param = $this->getParameter('id');
-        if (!$param)
-        {
-            $this->addFlash('error', 'Pour modifier un profil, il faut déjà en avoir un !');
-            return $this->redirectToRoute('accueil');
-        }
-
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        $utilisateur = $utilisateurRepository->find($param);
-
-        if ($utilisateur->getStatus())
+        $utilisateur = $this->getClient($utilisateurRepository);
+        if (!$utilisateur)
         {
-            $this->addFlash('error', 'Un admin ne peut pas modifier des profils');
+            $this->addFlash('error', 'Seul un Client peut modifier son profil');
             return $this->redirectToRoute('accueil');
         }
 
@@ -122,20 +150,12 @@ class UtilisateurController extends AbstractController
      */
     public function gererUtilisateursAction() : Response
     {
-        $param = $this->getParameter('id');
-        if (!$param)
-        {
-            $this->addFlash('error', 'Pour gérer les utilisateurs, il faut être admin, et non pas un anonyme !');
-            return $this->redirectToRoute('accueil');
-        }
-
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        $utilisateur = $utilisateurRepository->find($param);
 
-        if (!$utilisateur->getStatus())
+        if (!$this->getAdmin($utilisateurRepository))
         {
-            $this->addFlash('error', 'Un client ne peut pas gérer les utilisateurs');
+            $this->addFlash('error', 'Seul un administrateur peut gérer les utilisateur');
             return $this->redirectToRoute('accueil');
         }
 
@@ -148,33 +168,52 @@ class UtilisateurController extends AbstractController
      */
     public function supprimerUtilisateurAction($id) : Response
     {
-        $param = $this->getParameter('id');
-        if (!$param)
-        {
-            $this->addFlash('error', 'Pour supprimer un utilisateur, il faut être admin, et non pas un anonyme !');
-            return $this->redirectToRoute('accueil');
-        }
-
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        $utilisateur = $utilisateurRepository->find($param);
 
-        if (!$utilisateur->getStatus())
+        if (!$this->getAdmin($utilisateurRepository))
         {
-            $this->addFlash('error', 'Un client ne peut pas supprimer un utilisateur');
+            $this->addFlash('error', 'Seul un administrateur peut supprimer un utilisateur');
             return $this->redirectToRoute('accueil');
         }
 
-        $utilisateur = $utilisateurRepository->find($id);
-        $em->remove($utilisateur);
+
+        $utilisateurSupprime = $utilisateurRepository->find($id);
+        $em->remove($utilisateurSupprime);
         $em->flush();
         return $this->redirectToRoute('gererUtilisateurs');
     }
 
-
-    private function redirectIfNotAdmin()
+    public function getAdmin($utilisateurRepository)
     {
+        $param = $this->getParameter('id');
+        $utilisateur = $utilisateurRepository->find($param);
 
+        if (!$utilisateur || !$utilisateur->getStatus())
+            return false;
+        else
+            return $utilisateur;
+
+    }
+
+    public function getClient($utilisateurRepository)
+    {
+        $param = $this->getParameter('id');
+        $utilisateur = $utilisateurRepository->find($param);
+
+        if (!$utilisateur || $utilisateur->getStatus())
+            return false;
+        else
+            return $utilisateur;
+
+    }
+
+    public function getAnonyme($utilisateurRepository)
+    {
+        $param = $this->getParameter('id');
+        $utilisateur = $utilisateurRepository->find($param);
+
+        return !$utilisateur;
     }
 
 

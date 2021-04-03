@@ -30,8 +30,8 @@ class UtilisateurType extends AbstractType
             ->add('dateDeNaissance', DateType::class,
                 ['label' => 'date de naissance', 'attr' => ['placeholder' =>'date de naissance']])
 
-            //->add('status', CheckboxType::class,
-                //['label' => 'status');
+            ->add('status', CheckboxType::class,
+                ['label' => 'status']);
         ;
     }
 
