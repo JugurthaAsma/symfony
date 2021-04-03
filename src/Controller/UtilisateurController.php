@@ -83,9 +83,21 @@ class UtilisateurController extends AbstractController
     public function modifierProfilAction(Request $request): Response
     {
         $param = $this->getParameter('id');
+        if (!$param)
+        {
+            $this->addFlash('error', 'Pour modifier un profil, il faut déjà en avoir un !');
+            return $this->redirectToRoute('accueil');
+        }
+
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
         $utilisateur = $utilisateurRepository->find($param);
+
+        if ($utilisateur->getStatus())
+        {
+            $this->addFlash('error', 'Un admin ne peut pas modifier des profils');
+            return $this->redirectToRoute('accueil');
+        }
 
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
         $form->add('send', SubmitType::class, ['label' => 'Modifier mon profil']);
@@ -105,6 +117,65 @@ class UtilisateurController extends AbstractController
         return $this->render('niveau3/creerCompte.html.twig', $args);
     }
 
+    /**
+     * @Route ("/gererUtilisateurs", name="gererUtilisateurs")
+     */
+    public function gererUtilisateursAction() : Response
+    {
+        $param = $this->getParameter('id');
+        if (!$param)
+        {
+            $this->addFlash('error', 'Pour gérer les utilisateurs, il faut être admin, et non pas un anonyme !');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        $utilisateur = $utilisateurRepository->find($param);
+
+        if (!$utilisateur->getStatus())
+        {
+            $this->addFlash('error', 'Un client ne peut pas gérer les utilisateurs');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $utilisateurs = $utilisateurRepository->findAll();
+        return $this->render('niveau3/utilisateurs.html.twig', ['utilisateurs' => $utilisateurs]);
+    }
+
+    /**
+     * @Route ("/supprimerUtilisateur/{id}", name="supprimerUtilisateur")
+     */
+    public function supprimerUtilisateurAction($id) : Response
+    {
+        $param = $this->getParameter('id');
+        if (!$param)
+        {
+            $this->addFlash('error', 'Pour supprimer un utilisateur, il faut être admin, et non pas un anonyme !');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        $utilisateur = $utilisateurRepository->find($param);
+
+        if (!$utilisateur->getStatus())
+        {
+            $this->addFlash('error', 'Un client ne peut pas supprimer un utilisateur');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $utilisateur = $utilisateurRepository->find($id);
+        $em->remove($utilisateur);
+        $em->flush();
+        return $this->redirectToRoute('gererUtilisateurs');
+    }
+
+
+    private function redirectIfNotAdmin()
+    {
+
+    }
 
 
 }

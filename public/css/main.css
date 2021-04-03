@@ -4,7 +4,10 @@
     box-sizing: border-box;
 }
 
+ul {
+    margin: 30px;
+}
 
-header{
-    border: 1px solid black;
+.vue {
+    padding: 20px;
 }

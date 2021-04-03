@@ -3,13 +3,17 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 {% endblock %}
 
 {% block main %}
+
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
+        <div class="alert alert-success"> {{ message }} </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger"> {{ message }} </div>
     {% endfor %}
 
     {% block header %}
@@ -17,7 +21,6 @@
     {% endblock %}
 
     <div class="vue">
-    <h1>VUE</h1>
         {% block vue %}
 
         {% endblock %}

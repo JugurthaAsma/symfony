@@ -1,5 +1,32 @@
 {% extends 'niveau2/main.html.twig' %}
 
 {% block vue %}
+    <form action="" method="post">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>login</th>
+                <th>mot de passe</th>
+                <th>nom</th>
+                <th>prénom</th>
+                <th>date de naissance</th>
+                <th>statut</th>
+                <th>supprimer</th>
+            </tr>
 
+            </thead>
+            {% for utilisateur in utilisateurs %}
+                <tr>
+                    <td>{{ utilisateur.login }}</td>
+                    <td>{{ utilisateur.motDePasse }}</td>
+                    <td>{{ utilisateur.nom }}</td>
+                    <td>{{ utilisateur.prenom }}</td>
+                    <td>{{ utilisateur.dateDeNaissance|date('d-m-Y') }}</td>
+                    <td>{{ utilisateur.status ? 'Admin' : 'Client' }}</td>
+                    <td><a href="{{ path('supprimerUtilisateur', {'id' : utilisateur.id}) }}" class="btn btn-danger">X</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" class="btn btn-outline-primary">Ajouter</button>
+    </form>
 {% endblock %}
