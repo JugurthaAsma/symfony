@@ -1,5 +1,33 @@
 {% extends 'niveau2/main.html.twig' %}
 
 {% block vue %}
+    <form action="" method="post">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>libellé</th>
+                <th>prix unitaire</th>
+                <th>quantité en stock</th>
+                <th>commander</th>
+            </tr>
+
+            </thead>
+            {% for produit in produits %}
+                <tr>
+                    <td>{{ produit.libelle }}</td>
+                    <td>{{ produit.prix }} €</td>
+                    <td>{{ produit.quantite }}</td>
+                    <td>
+                        <select name="produit[{{ produit.id }}]" id="{{ produit.id }}">
+                            {% for i in 0..produit.quantite %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" class="btn btn-outline-primary">Ajouter</button>
+    </form>
 
 {% endblock %}

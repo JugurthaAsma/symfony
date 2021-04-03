@@ -4,8 +4,9 @@
 
 
 <h3>menu Anonyme</h3>
+<p>Il y a {{ nbrProduits }} produits disponibles</p>
 
 <ul>
-    <li><a href="Se connecter">Se connecter</a></li>
-    <li><a href="Créer un compte">Créer un compte</a></li>
+    <li><a href="{{ path('seConnecter') }}">Se connecter</a></li>
+    <li><a href="{{ path('creerCompte') }}">Créer un compte</a></li>
 </ul>

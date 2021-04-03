@@ -42,7 +42,7 @@ class AccueilController extends AbstractController
         }
 
 
-        return $this->render('niveau2/main.html.twig', $args);
+        return $this->render('niveau3/accueil.html.twig', $args);
     }
 
     /**

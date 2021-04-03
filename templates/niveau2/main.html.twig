@@ -1,19 +1,36 @@
 {% extends "niveau1/base.html.twig" %}
 
+
 {% block stylesheets %}
-    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 {% endblock %}
 
 {% block main %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
 
     {% block header %}
             {{ render(controller('App\\Controller\\UtilisateurController::headerAction')) }}
     {% endblock %}
 
-    {% block vue %}
-        <div class="vue">
-            <h1>VUE</h1>
-        </div>
-    {% endblock %}
+    <div class="vue">
+    <h1>VUE</h1>
+        {% block vue %}
+
+        {% endblock %}
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+    <footer>
+        <p>footer</p>
+        <!--
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#273036" fill-opacity="1" d="M0,160L0,128L144,128L144,32L288,32L288,224L432,224L432,160L576,160L576,64L720,64L720,192L864,192L864,128L1008,128L1008,32L1152,32L1152,96L1296,96L1296,64L1440,64L1440,320L1296,320L1296,320L1152,320L1152,320L1008,320L1008,320L864,320L864,320L720,320L720,320L576,320L576,320L432,320L432,320L288,320L288,320L144,320L144,320L0,320L0,320Z"></path></svg>
+         -->
+    </footer>
 
 {% endblock %}

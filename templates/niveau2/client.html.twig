@@ -4,10 +4,11 @@
 
 
 <h3>menu Client</h3>
+<p>Il y a {{ nbrProduits }} produits disponibles</p>
 
 <ul>
-    <li><a href="Se deconnecter">Se deconnecter</a></li>
-    <li><a href="Modifier le profil">Modifier le profil</a></li>
-    <li><a href="Lister le contenu du magasin">Lister le contenu du magasin</a></li>
+    <li><a href="{{ path('seDeconnecter') }}">Se déconnecter</a></li>
+    <li><a href="{{ path('modifierProfil') }}">Modifier le profil</a></li>
+    <li><a href="{{ path('magasin') }}">Lister le contenu du magasin</a></li>
     <li><a href="Gérer son panier">Gérer son panier</a></li>
 </ul>
