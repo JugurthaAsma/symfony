@@ -7,6 +7,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,7 +20,7 @@ class UtilisateurType extends AbstractType
             ->add('login', TextType::class,
                 ['label' => 'login', 'attr' => ['placeholder' =>'login']])
 
-            ->add('motDePasse', TextType::class,
+            ->add('motDePasse', PasswordType::class,
                 ['label' => 'mot de passe', 'attr' => ['placeholder' =>'mot de passe']])
 
             ->add('nom', TextType::class,
@@ -27,7 +29,7 @@ class UtilisateurType extends AbstractType
             ->add('prenom', TextType::class,
                 ['label' => 'prenom', 'attr' => ['placeholder' =>'prenom']])
 
-            ->add('dateDeNaissance', DateType::class,
+            ->add('dateDeNaissance', BirthdayType::class,
                 ['label' => 'date de naissance', 'attr' => ['placeholder' =>'date de naissance']])
 
             ->add('status', CheckboxType::class,

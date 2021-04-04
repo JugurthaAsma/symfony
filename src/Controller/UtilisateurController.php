@@ -32,7 +32,7 @@ class UtilisateurController extends AbstractController
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
         $utilisateur = $utilisateurRepository->find($param);
 
-        if ($param == 0 || !$utilisateur)
+        if (!$utilisateur)
         {
             return $this->render('niveau2/anonyme.html.twig', ['nbrProduits' => $nbrProduits]);
         }
@@ -128,11 +128,13 @@ class UtilisateurController extends AbstractController
         }
 
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
+        $form->remove('status'); // obligatoirement un compte client
         $form->add('send', SubmitType::class, ['label' => 'Modifier mon profil']);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid())
         {
+            $utilisateur->setStatus(false);
             $em->flush();
             $this->addFlash('success', 'Profil modifié avec succès');
             return $this->redirectToRoute('magasin');
@@ -183,6 +185,7 @@ class UtilisateurController extends AbstractController
         $em->flush();
         return $this->redirectToRoute('gererUtilisateurs');
     }
+
 
     public function getAdmin($utilisateurRepository)
     {

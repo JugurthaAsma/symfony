@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -69,6 +71,11 @@ class Utilisateur
      * @Assert\Type("bool", message="{{ value }} n'est pas un {{ type }}")
      */
     private $status;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Panier::class, mappedBy="utilisateur", orphanRemoval=true)
+     */
+    private $paniers;
 
     public function getId(): ?int
     {
@@ -153,6 +160,37 @@ class Utilisateur
         $this->prenom = null;
         $this->dateDeNaissance = null;
         $this->status = false;
+        $this->paniers = new ArrayCollection();
 
+    }
+
+    /**
+     * @return Collection|Panier[]
+     */
+    public function getPaniers(): Collection
+    {
+        return $this->paniers;
+    }
+
+    public function addPanier(Panier $panier): self
+    {
+        if (!$this->paniers->contains($panier)) {
+            $this->paniers[] = $panier;
+            $panier->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePanier(Panier $panier): self
+    {
+        if ($this->paniers->removeElement($panier)) {
+            // set the owning side to null (unless already changed)
+            if ($panier->getUtilisateur() === $this) {
+                $panier->setUtilisateur(null);
+            }
+        }
+
+        return $this;
     }
 }

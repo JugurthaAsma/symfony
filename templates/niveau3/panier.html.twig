@@ -1,5 +1,43 @@
 {% extends 'niveau2/main.html.twig' %}
 
 {% block vue %}
+    <form action="" method="post">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>produit</th>
+                <th>prix unitaire</th>
+                <th>quantité</th>
+                <th>prix</th>
+            </tr>
+
+            </thead>
+            {% set quantiteTotal, prixTotal = 0, 0%}
+
+            {% for ligne in panier %}
+                <tr>
+                    <td>{{ ligne.produit.libelle }}</td>
+                    <td>{{ ligne.produit.prix }} €</td>
+                    <td>{{ ligne.quantite }}</td>
+                    <td>{{ (ligne.quantite * ligne.produit.prix) }} €</td>
+                    <td><a href="{{ path('supprimerUtilisateur', {'id' : ligne.utilisateur.id}) }}" class="btn btn-danger">X</a></td>
+
+                    {% set quantiteTotal = quantiteTotal + ligne.quantite %}
+                    {% set prixTotal = prixTotal + (ligne.quantite * ligne.produit.prix) %}
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td><b>Total</b></td>
+                <td></td>
+                <td><b>{{ quantiteTotal }}</b></td>
+                <td><b>{{ prixTotal }} €</b></td>
+                <td></td>
+            </tr>
+        </table>
+        <button type="submit" class="btn btn-outline-primary">Acheter</button>
+        <button type="submit" class="btn btn-outline-warning">Vider</button>
+    </form>
+
 
 {% endblock %}

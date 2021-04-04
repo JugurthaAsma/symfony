@@ -71,6 +71,22 @@ class ProduitController extends AbstractController
         return $this->render('niveau3/ajout.html.twig', $args);
     }
 
+    /**
+     * @Route ("/panier", name="panier")
+     */
+    public function panierAction() : Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        $panierRepository = $em->getRepository('App:Panier');
+        $user = $this->getClient($utilisateurRepository);
+        $panier = $panierRepository->findBy(['utilisateur' => $user]);
+
+        return $this->render('niveau3/panier.html.twig', ['panier' => $panier]);
+    }
+
+
+
     public function getAdmin($utilisateurRepository)
     {
         $param = $this->getParameter('id');
