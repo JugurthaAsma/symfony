@@ -4,8 +4,10 @@
 namespace App\Controller;
 
 
+use App\Entity\Panier;
 use App\Entity\Produit;
 use App\Controller\UtilisateurController;
+use App\Entity\Utilisateur;
 use App\Form\ProduitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -21,12 +23,13 @@ class ProduitController extends AbstractController
     /**
      * @Route ("/magasin", name="magasin")
      */
-    public function magasinAction() : Response
+    public function magasinAction(Request $request) : Response
     {
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
         $produitRepository = $em->getRepository('App:Produit');
 
+        /** @var Utilisateur $utilisateur */
         $utilisateur = $this->getClient($utilisateurRepository);
         if (!$utilisateur)
         {
@@ -35,6 +38,50 @@ class ProduitController extends AbstractController
         }
 
         $produits = $produitRepository->findAll();
+
+        $post = $request->request->get('produit');
+        if ($post)
+        {
+            dump('post');
+            $produitsAchetes = array_filter($post, function ($data) { return $data > 0; });
+            $panierRepository = $em->getRepository('App:Panier');
+            foreach ($produitsAchetes as $key => $value)
+            {
+                // retirer la quantite du magasin
+                $currentProduit = $produitRepository->find($key);
+                $currentProduit->setQuantite($currentProduit->getQuantite() - $value);
+                // ajouter au panier
+                $produitPanier =  $panierRepository->findOneBy([
+                    'produit' => $currentProduit,
+                    'utilisateur' => $utilisateur
+                ]);
+                // si le produit n'est pas dans le panier on
+                if(!$produitPanier)
+                {
+                    $panier = new Panier();
+                    $panier->setProduit($currentProduit);
+                    dump('user');
+                    dump($utilisateur);
+                    $panier->setUtilisateur($utilisateur);
+                    $panier->setQuantite($value);
+                    $em->persist($panier);
+                    dump('new');
+                    dump($panier);
+
+                }
+                else
+                {
+                    $produitPanier->setQuantite($produitPanier->getQuantite() + $value);
+                    dump('update');
+                    dump($produitPanier);
+                }
+                $em->flush();
+
+            }
+
+        }
+
+
         return $this->render('niveau3/magasin.html.twig', ['produits' => $produits]);
     }
 
@@ -78,12 +125,97 @@ class ProduitController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        $panierRepository = $em->getRepository('App:Panier');
-        $user = $this->getClient($utilisateurRepository);
-        $panier = $panierRepository->findBy(['utilisateur' => $user]);
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getClient($utilisateurRepository);
+        if (!$utilisateur)
+        {
+            $this->addFlash('error', 'Seul un Client peut accéder à son panier');
+            return $this->redirectToRoute('accueil');
+        }
+        $panier = $utilisateur->getPaniers();
 
         return $this->render('niveau3/panier.html.twig', ['panier' => $panier]);
     }
+
+    /**
+     * @Route ("/retirerProduit/{id}", name="retirerProduit")
+     */
+    public function retirerProduitAction($id) : Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getClient($utilisateurRepository);
+        if (!$utilisateur)
+        {
+            $this->addFlash('error', 'Seul un Client peut retirer des produit de son panier');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $panierRepository = $em->getRepository('App:Panier');
+        $panier = $panierRepository->find($id);
+        $produit = $panier->getProduit();
+        $produit->setQuantite($produit->getQuantite() + $panier->getQuantite());
+
+        $em->remove($panier);
+        $em->persist($produit);
+        $em->flush();
+        return $this->redirectToRoute('panier');
+    }
+
+    /**
+     * @Route ("/viderPanier", name="viderPanier")
+     */
+    public function viderPanierAction() : Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getClient($utilisateurRepository);
+        if (!$utilisateur)
+        {
+            $this->addFlash('error', 'Seul un Client peut vider son panier');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $panierRepository = $em->getRepository('App:Panier');
+        $paniers = $panierRepository->findBy(['utilisateur' => $utilisateur]);
+
+        foreach ($paniers as $panier) {
+            $currentProduit = $panier->getProduit();
+            $currentProduit->setQuantite($currentProduit->getQuantite() + $panier->getQuantite());
+            $em->remove($panier);
+        }
+        
+        $em->flush();
+        return $this->redirectToRoute('panier');
+    }
+    /**
+     * @Route ("/acheter", name="acheter")
+     */
+    public function acheterAction() : Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateurRepository = $em->getRepository('App:Utilisateur');
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getClient($utilisateurRepository);
+        if (!$utilisateur)
+        {
+            $this->addFlash('error', 'Seul un Client peut acheter les produits de son panier');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $panierRepository = $em->getRepository('App:Panier');
+        $paniers = $panierRepository->findBy(['utilisateur' => $utilisateur]);
+
+        foreach ($paniers as $panier)
+            $em->remove($panier);
+
+
+        $em->flush();
+        return $this->redirectToRoute('panier');
+    }
+
 
 
 

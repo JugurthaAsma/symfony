@@ -38,7 +38,6 @@ class UtilisateurController extends AbstractController
         }
         else
         {
-
             if ($utilisateur->getStatus())
                 return $this->render('niveau2/admin.html.twig', ['nbrProduits' => $nbrProduits]);
             else

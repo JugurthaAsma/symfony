@@ -8,7 +8,6 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Entity\Utilisateur;
 
 
 class AccueilController extends AbstractController
@@ -23,51 +22,23 @@ class AccueilController extends AbstractController
         $utilisateurRepository = $em->getRepository('App:Utilisateur');
         $utilisateur = $utilisateurRepository->find($param);
 
-        if ($param == 0 || !$utilisateur)
-        {
-            $args = [
-                'nom' => '',
-                'status' => 'Anonyme',
-            ];
-        }
-        else
-        {
+        // anonyme par défaut
+        $nom = '';
+        $status = 'Anonyme';
 
-            $args = [
-                'nom' => $utilisateur->getLogin(),
-                'status' => $utilisateur->getStatus() == 1 ? 'Admin' : 'Client',
-
-            ];
+        if ($utilisateur)
+        {
+            $nom = $utilisateur->getLogin();
+            $status = $utilisateur->getStatus() == 1 ? 'Admin' : 'Client';
         }
 
+        $args = [
+            'nom' => $nom,
+            'status' => $status,
+
+        ];
 
         return $this->render('niveau3/accueil.html.twig', $args);
     }
 
-    /**
-     * @Route(
-     *     "/ajout/{login}/{motdepasse}/{status}",
-     *     name="ajout",
-     *     defaults={"status":0}
-     * )
-     */
-    public function ajoutAction($login, $motdepasse, $status): Response
-    {
-        $em = $this->getDoctrine($login)->getManager();
-
-        $utilisateur = new Utilisateur();
-        $utilisateur->setLogin($login);
-        $utilisateur->setMotDePasse(sha1($motdepasse));
-        if($status == 1)
-            $utilisateur->setStatus(true);
-
-
-        $em->persist($utilisateur);
-        $em->flush();
-
-        $this->addFlash('info', 'Utilisateur ajouté !');
-
-
-        return $this->redirectToRoute('accueil');
-    }
 }

@@ -5,10 +5,11 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>produit</th>
-                <th>prix unitaire</th>
-                <th>quantité</th>
-                <th>prix</th>
+                <th>Produit</th>
+                <th>Prix unitaire</th>
+                <th>Quantité</th>
+                <th>Prix</th>
+                <th>Actions</th>
             </tr>
 
             </thead>
@@ -20,7 +21,10 @@
                     <td>{{ ligne.produit.prix }} €</td>
                     <td>{{ ligne.quantite }}</td>
                     <td>{{ (ligne.quantite * ligne.produit.prix) }} €</td>
-                    <td><a href="{{ path('supprimerUtilisateur', {'id' : ligne.utilisateur.id}) }}" class="btn btn-danger">X</a></td>
+                    <td>
+                        <a href="{{ path('magasin') }}" class="btn btn-info">+</a>
+                        <a href="{{ path('retirerProduit', {'id' : ligne.id}) }}" class="btn btn-danger">X</a>
+                    </td>
 
                     {% set quantiteTotal = quantiteTotal + ligne.quantite %}
                     {% set prixTotal = prixTotal + (ligne.quantite * ligne.produit.prix) %}
@@ -35,8 +39,8 @@
                 <td></td>
             </tr>
         </table>
-        <button type="submit" class="btn btn-outline-primary">Acheter</button>
-        <button type="submit" class="btn btn-outline-warning">Vider</button>
+        <a href="{{ path('acheter') }}" type="submit" class="btn btn-outline-primary">Acheter</a>
+        <a href="{{ path('viderPanier') }}"type="submit" class="btn btn-outline-warning">Vider</a>
     </form>
 
 

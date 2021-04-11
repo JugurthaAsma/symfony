@@ -7,9 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Table (
- *     name="asso_utilisateurs_produits",
+ *     name="im2021_asso_utilisateurs_produits",
  *     uniqueConstraints={
- *          @ORM\UniqueConstraint(name="aup_idx", columns={"id_utilisateur", "id_produit"})
+ *          @ORM\UniqueConstraint(name="aup_index", columns={"id_utilisateur", "id_produit"})
  *     }
  *)
  * @ORM\Entity(repositoryClass=PanierRepository::class)

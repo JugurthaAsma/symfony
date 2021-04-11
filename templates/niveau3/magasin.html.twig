@@ -18,7 +18,7 @@
                     <td>{{ produit.prix }} €</td>
                     <td>{{ produit.quantite }}</td>
                     <td>
-                        <select name="produit[{{ produit.id }}]" id="{{ produit.id }}">
+                        <select class="form-control" {{ (produit.quantite == 0) ? 'disabled': '' }} name="produit[{{ produit.id }}]" id="{{ produit.id }}">
                             {% for i in 0..produit.quantite %}
                                 <option value="{{ i }}">{{ i }}</option>
                             {% endfor %}

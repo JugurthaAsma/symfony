@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="myBase.db">
-  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.20">
+  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.21">
     <root id="1">
       <ServerVersion>3.34.0</ServerVersion>
     </root>
@@ -369,8 +369,8 @@
     <package id="167" parent="1" name="json_tree"/>
     <package id="168" parent="1" name="rtree"/>
     <package id="169" parent="1" name="rtree_i32"/>
-    <table id="170" parent="2" name="asso_utilisateurs_produits"/>
-    <table id="171" parent="2" name="doctrine_migration_versions"/>
+    <table id="170" parent="2" name="doctrine_migration_versions"/>
+    <table id="171" parent="2" name="im2021_asso_utilisateurs_produits"/>
     <table id="172" parent="2" name="im2021_produits"/>
     <table id="173" parent="2" name="im2021_utilisateurs"/>
     <table id="174" parent="2" name="sqlite_master">
@@ -1336,70 +1336,71 @@
     <argument id="494" parent="159">
       <Position>1</Position>
     </argument>
-    <column id="495" parent="170" name="id">
-      <Position>1</Position>
-      <DataType>INTEGER|0s</DataType>
-      <NotNull>1</NotNull>
-      <SequenceIdentity>null</SequenceIdentity>
-    </column>
-    <column id="496" parent="170" name="id_utilisateur">
-      <Position>2</Position>
-      <DataType>INTEGER|0s</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="497" parent="170" name="id_produit">
-      <Position>3</Position>
-      <DataType>INTEGER|0s</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="498" parent="170" name="quantite">
-      <Position>4</Position>
-      <DataType>INTEGER|0s</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <index id="499" parent="170" name="aup_idx">
-      <ColNames>id_utilisateur
-id_produit</ColNames>
-      <ColumnCollations></ColumnCollations>
-      <Unique>1</Unique>
-    </index>
-    <index id="500" parent="170" name="IDX_B052AF0650EAE44">
-      <ColNames>id_utilisateur</ColNames>
-      <ColumnCollations></ColumnCollations>
-    </index>
-    <index id="501" parent="170" name="IDX_B052AF06F7384557">
-      <ColNames>id_produit</ColNames>
-      <ColumnCollations></ColumnCollations>
-    </index>
-    <key id="502" parent="170">
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <column id="503" parent="171" name="version">
+    <column id="495" parent="170" name="version">
       <Position>1</Position>
       <DataType>VARCHAR(191)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="504" parent="171" name="executed_at">
+    <column id="496" parent="170" name="executed_at">
       <Position>2</Position>
       <DataType>DATETIME|0s</DataType>
       <DefaultExpression>NULL</DefaultExpression>
     </column>
-    <column id="505" parent="171" name="execution_time">
+    <column id="497" parent="170" name="execution_time">
       <Position>3</Position>
       <DataType>INTEGER|0s</DataType>
       <DefaultExpression>NULL</DefaultExpression>
     </column>
-    <index id="506" parent="171" name="sqlite_autoindex_doctrine_migration_versions_1">
+    <index id="498" parent="170" name="sqlite_autoindex_doctrine_migration_versions_1">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>version</ColNames>
       <ColumnCollations></ColumnCollations>
       <Unique>1</Unique>
     </index>
-    <key id="507" parent="171">
+    <key id="499" parent="170">
       <ColNames>version</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_doctrine_migration_versions_1</UnderlyingIndexName>
+    </key>
+    <column id="500" parent="171" name="id">
+      <Position>1</Position>
+      <DataType>INTEGER|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>null</SequenceIdentity>
+    </column>
+    <column id="501" parent="171" name="id_utilisateur">
+      <Position>2</Position>
+      <DataType>INTEGER|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="502" parent="171" name="id_produit">
+      <Position>3</Position>
+      <DataType>INTEGER|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="503" parent="171" name="quantite">
+      <Position>4</Position>
+      <DataType>INTEGER|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <index id="504" parent="171" name="aup_index">
+      <ColNames>id_utilisateur
+id_produit</ColNames>
+      <ColumnCollations>
+</ColumnCollations>
+      <Unique>1</Unique>
+    </index>
+    <index id="505" parent="171" name="IDX_99944CAC50EAE44">
+      <ColNames>id_utilisateur</ColNames>
+      <ColumnCollations></ColumnCollations>
+    </index>
+    <index id="506" parent="171" name="IDX_99944CACF7384557">
+      <ColNames>id_produit</ColNames>
+      <ColumnCollations></ColumnCollations>
+    </index>
+    <key id="507" parent="171">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
     </key>
     <column id="508" parent="172" name="id">
       <Position>1</Position>
