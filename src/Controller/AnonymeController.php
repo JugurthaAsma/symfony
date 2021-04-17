@@ -21,10 +21,9 @@ class AnonymeController extends AbstractController
     /**
      * @Route ("/seConnecter", name="seConnecter")
      */
-    public function seConnecterAction(ContainerInterface $container, UtilisateurRepository $utilisateurRepository): Response
+    public function seConnecterAction(ContainerInterface $container): Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getAnonyme($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getAnonyme();
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un anonyme peut se connecter');
@@ -36,10 +35,9 @@ class AnonymeController extends AbstractController
     /**
      * @Route ("/creerCompte", name="creerCompte")
      */
-    public function creerUnCompteAction(EntityManagerInterface $em, ContainerInterface $container, UtilisateurRepository $utilisateurRepository, Request $request): Response
+    public function creerUnCompteAction(EntityManagerInterface $em, ContainerInterface $container, Request $request): Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getAnonyme($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getAnonyme();
         if (!$utilisateur) {
             $this->addFlash('error', 'Seul un anonyme peut se créer un compte');
             return $this->redirectToRoute('accueil');

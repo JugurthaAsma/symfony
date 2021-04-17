@@ -5,11 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Produit;
 use App\Entity\Utilisateur;
-use App\Form\UtilisateurType;
 use App\Repository\UtilisateurRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -46,12 +43,36 @@ class UtilisateurController extends AbstractController
     }
 
     /**
-     * @Route ("/seDeconnecter", name="seDeconnecter")
+     * @Route("/", name="accueil")
      */
-    public function seDeconnecterAction(UtilisateurRepository $utilisateurRepository): Response
+    public function homeAction(UtilisateurRepository $utilisateurRepository): Response
     {
         $param = $this->getParameter('id');
-        if ($this->getAnonyme($param, $utilisateurRepository))
+        $utilisateur = $utilisateurRepository->find($param);
+
+        // anonyme par défaut
+        $prenom = '';
+        $status = 'Anonyme';
+
+        if ($utilisateur) {
+            $prenom = $utilisateur->getPrenom();
+            $status = $utilisateur->getStatus() == 1 ? 'Admin' : 'Client';
+        }
+
+        $args = [
+            'prenom' => $prenom,
+            'status' => $status,
+        ];
+
+        return $this->render('niveau3/accueil.html.twig', $args);
+    }
+
+    /**
+     * @Route ("/seDeconnecter", name="seDeconnecter")
+     */
+    public function seDeconnecterAction(): Response
+    {
+        if ($this->getAnonyme())
             $this->addFlash('error', 'Vous n\'êtes même pas connecté' );
         else
             $this->addFlash('success', 'Déconnexion avec succès');
@@ -59,33 +80,28 @@ class UtilisateurController extends AbstractController
     }
 
 
-    public function getAdmin($param, $utilisateurRepository)
+    public function getAdmin()
     {
-        $utilisateur = $utilisateurRepository->find($param);
-
-        if (!$utilisateur || !$utilisateur->getStatus())
-            return false;
-        else
-            return $utilisateur;
-
+        $utilisateur = $this->getUtilisateur();
+        return (!$utilisateur || !$utilisateur->getStatus()) ? false : $utilisateur;
     }
 
-    public function getClient($param, $utilisateurRepository)
+    public function getClient()
     {
-        $utilisateur = $utilisateurRepository->find($param);
-
-        if (!$utilisateur || $utilisateur->getStatus())
-            return false;
-        else
-            return $utilisateur;
-
+        $utilisateur = $this->getUtilisateur();
+        return (!$utilisateur || $utilisateur->getStatus()) ? false : $utilisateur;
     }
 
-    public function getAnonyme($param, $utilisateurRepository)
+    public function getAnonyme()
     {
-        $utilisateur = $utilisateurRepository->find($param);
+        return !$this->getUtilisateur();
+    }
 
-        return !$utilisateur;
+    private function getUtilisateur() : ?Utilisateur
+    {
+        $param = $this->getParameter('id');
+        $utilisateurRepository = $this->getDoctrine()->getManager()->getRepository('App:Utilisateur');
+        return $utilisateurRepository->find($param);
     }
 
 

@@ -21,10 +21,9 @@ class ClientController extends AbstractController
     /**
      * @Route ("/modifierProfil", name="modifierProfil")
      */
-    public function modifierProfilAction(ContainerInterface $container, Request $request, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository): Response
+    public function modifierProfilAction(ContainerInterface $container, Request $request, EntityManagerInterface $em): Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
 
         if (!$utilisateur)
         {
@@ -50,17 +49,15 @@ class ClientController extends AbstractController
             $this->addFlash('error', 'Erreur, modifications invalide');
 
         $args = ['myform' => $form->createView()];
-        return $this->render('niveau3/creerCompte.html.twig', $args);
+        return $this->render('niveau3/modifierProfil.html.twig', $args);
     }
 
     /**
      * @Route ("/magasin", name="magasin")
      */
-    public function magasinAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository, ProduitRepository $produitRepository, Request $request) : Response
+    public function magasinAction(ContainerInterface $container, EntityManagerInterface $em, ProduitRepository $produitRepository, Request $request) : Response
     {
-        $param = $this->getParameter('id');
-
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut avoir accès au magasin');
@@ -108,10 +105,9 @@ class ClientController extends AbstractController
     /**
      * @Route ("/panier", name="panier")
      */
-    public function panierAction(ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
+    public function panierAction(ContainerInterface $container) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
 
         if (!$utilisateur)
         {
@@ -126,10 +122,9 @@ class ClientController extends AbstractController
     /**
      * @Route ("/retirerProduit/{id}", name="retirerProduit")
      */
-    public function retirerProduitAction($id, ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
+    public function retirerProduitAction($id, ContainerInterface $container, EntityManagerInterface $em) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
 
         if (!$utilisateur)
         {
@@ -151,10 +146,9 @@ class ClientController extends AbstractController
     /**
      * @Route ("/viderPanier", name="viderPanier")
      */
-    public function viderPanierAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
+    public function viderPanierAction(ContainerInterface $container, EntityManagerInterface $em) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
 
         if (!$utilisateur)
         {
@@ -162,8 +156,7 @@ class ClientController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        $panierRepository = $em->getRepository('App:Panier');
-        $paniers = $panierRepository->findBy(['utilisateur' => $utilisateur]);
+        $paniers = $utilisateur->getPaniers();
 
         foreach ($paniers as $panier) {
             $currentProduit = $panier->getProduit();
@@ -178,10 +171,9 @@ class ClientController extends AbstractController
     /**
      * @Route ("/acheter", name="acheter")
      */
-    public function acheterAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
+    public function acheterAction(ContainerInterface $container, EntityManagerInterface $em) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient();
 
         if (!$utilisateur)
         {
@@ -189,12 +181,10 @@ class ClientController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        $panierRepository = $em->getRepository('App:Panier');
-        $paniers = $panierRepository->findBy(['utilisateur' => $utilisateur]);
+        $paniers = $utilisateur->getPaniers();
 
         foreach ($paniers as $panier)
             $em->remove($panier);
-
 
         $em->flush();
         return $this->redirectToRoute('panier');

@@ -3,7 +3,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Produit;
 use App\Form\ProduitType;
 use App\Repository\UtilisateurRepository;
@@ -22,8 +21,7 @@ class AdminController extends AbstractController
      */
     public function gererUtilisateursAction(ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getAdmin($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getAdmin();
 
         if (!$utilisateur)
         {
@@ -40,8 +38,7 @@ class AdminController extends AbstractController
      */
     public function supprimerUtilisateurAction($id, EntityManagerInterface $em, ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getAdmin($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getAdmin();
 
         if (!$utilisateur)
         {
@@ -56,6 +53,14 @@ class AdminController extends AbstractController
         }
         else
         {
+            // vider le panier
+            $paniers = $utilisateurSupprime->getPaniers();
+            foreach ($paniers as $panier) {
+                $currentProduit = $panier->getProduit();
+                $currentProduit->setQuantite($currentProduit->getQuantite() + $panier->getQuantite());
+                $em->remove($panier);
+            }
+
             $em->remove($utilisateurSupprime);
             $em->flush();
             $this->addFlash('success', 'Utilisateur supprimé avec succès');
@@ -69,8 +74,7 @@ class AdminController extends AbstractController
      */
     public function ajouterAction(EntityManagerInterface $em, ContainerInterface $container, UtilisateurRepository $utilisateurRepository, Request $request):Response
     {
-        $param = $this->getParameter('id');
-        $utilisateur = $container->get('utilisateur')->getAdmin($param, $utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getAdmin();
 
         if (!$utilisateur)
         {
