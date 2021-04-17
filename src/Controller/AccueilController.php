@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 
+use App\Repository\UtilisateurRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,11 +16,9 @@ class AccueilController extends AbstractController
     /**
      * @Route("/", name="accueil")
      */
-    public function homeAction(): Response
+    public function homeAction(UtilisateurRepository $utilisateurRepository): Response
     {
         $param = $this->getParameter('id');
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
         $utilisateur = $utilisateurRepository->find($param);
 
         // anonyme par défaut

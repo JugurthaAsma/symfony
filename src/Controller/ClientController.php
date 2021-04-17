@@ -3,34 +3,64 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Panier;
-use App\Entity\Produit;
-use App\Controller\UtilisateurController;
-use App\Entity\Utilisateur;
-use App\Form\ProduitType;
+use App\Form\UtilisateurType;
+use App\Repository\ProduitRepository;
+use App\Repository\UtilisateurRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route ("/produit")
- */
-class ProduitController extends AbstractController
+class ClientController extends AbstractController
 {
+
+    /**
+     * @Route ("/modifierProfil", name="modifierProfil")
+     */
+    public function modifierProfilAction(ContainerInterface $container, Request $request, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository): Response
+    {
+        $param = $this->getParameter('id');
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+
+        if (!$utilisateur)
+        {
+            $this->addFlash('error', 'Seul un Client peut modifier son profil');
+            return $this->redirectToRoute('accueil');
+        }
+
+        $form = $this->createForm(UtilisateurType::class, $utilisateur);
+        $form->remove('status'); // obligatoirement un compte client
+        $form->add('send', SubmitType::class, ['label' => 'Modifier mon profil']);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $utilisateur->setStatus(false);
+            $utilisateur->setMotDePasse(sha1($utilisateur->getMotDePasse()));
+            $em->flush();
+            $this->addFlash('success', 'Profil modifié avec succès');
+            return $this->redirectToRoute('magasin');
+        }
+
+        if ($form->isSubmitted())
+            $this->addFlash('error', 'Erreur, modifications invalide');
+
+        $args = ['myform' => $form->createView()];
+        return $this->render('niveau3/creerCompte.html.twig', $args);
+    }
+
     /**
      * @Route ("/magasin", name="magasin")
      */
-    public function magasinAction(Request $request) : Response
+    public function magasinAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository, ProduitRepository $produitRepository, Request $request) : Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        $produitRepository = $em->getRepository('App:Produit');
+        $param = $this->getParameter('id');
 
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $this->getClient($utilisateurRepository);
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut avoir accès au magasin');
@@ -42,7 +72,6 @@ class ProduitController extends AbstractController
         $post = $request->request->get('produit');
         if ($post)
         {
-            dump('post');
             $produitsAchetes = array_filter($post, function ($data) { return $data > 0; });
             $panierRepository = $em->getRepository('App:Panier');
             foreach ($produitsAchetes as $key => $value)
@@ -60,73 +89,30 @@ class ProduitController extends AbstractController
                 {
                     $panier = new Panier();
                     $panier->setProduit($currentProduit);
-                    dump('user');
-                    dump($utilisateur);
                     $panier->setUtilisateur($utilisateur);
                     $panier->setQuantite($value);
                     $em->persist($panier);
-                    dump('new');
-                    dump($panier);
-
                 }
                 else
                 {
                     $produitPanier->setQuantite($produitPanier->getQuantite() + $value);
-                    dump('update');
-                    dump($produitPanier);
                 }
                 $em->flush();
 
             }
 
         }
-
-
         return $this->render('niveau3/magasin.html.twig', ['produits' => $produits]);
-    }
-
-    /**
-     * @Route ("/ajouter", name="produit_ajouter")
-     */
-    public function ajouterAction(Request $request):Response
-    {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        if (!$this->getAdmin($utilisateurRepository))
-        {
-            $this->addFlash('error', 'Seul un administrateur peut ajouter un produit');
-            return $this->redirectToRoute('accueil');
-        }
-
-        $produit = new Produit();
-        $form = $this->createForm(ProduitType::class, $produit);
-        $form->add('ajouter', SubmitType::class, ['label' => 'Ajouter le produit']);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            $em->persist($produit);
-            $em->flush();
-            $this->addFlash('success', 'Le produit a été ajouté avec succès');
-            return $this->redirectToRoute('accueil');
-        }
-
-        if ($form->isSubmitted())
-            $this->addFlash('error', "Erreur, modifications invalide");
-
-        $args = ['myform' => $form->createView()];
-        return $this->render('niveau3/ajout.html.twig', $args);
     }
 
     /**
      * @Route ("/panier", name="panier")
      */
-    public function panierAction() : Response
+    public function panierAction(ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $this->getClient($utilisateurRepository);
+        $param = $this->getParameter('id');
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut accéder à son panier');
@@ -140,12 +126,11 @@ class ProduitController extends AbstractController
     /**
      * @Route ("/retirerProduit/{id}", name="retirerProduit")
      */
-    public function retirerProduitAction($id) : Response
+    public function retirerProduitAction($id, ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $this->getClient($utilisateurRepository);
+        $param = $this->getParameter('id');
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut retirer des produit de son panier');
@@ -166,12 +151,11 @@ class ProduitController extends AbstractController
     /**
      * @Route ("/viderPanier", name="viderPanier")
      */
-    public function viderPanierAction() : Response
+    public function viderPanierAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $this->getClient($utilisateurRepository);
+        $param = $this->getParameter('id');
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut vider son panier');
@@ -186,19 +170,19 @@ class ProduitController extends AbstractController
             $currentProduit->setQuantite($currentProduit->getQuantite() + $panier->getQuantite());
             $em->remove($panier);
         }
-        
+
         $em->flush();
         return $this->redirectToRoute('panier');
     }
+
     /**
      * @Route ("/acheter", name="acheter")
      */
-    public function acheterAction() : Response
+    public function acheterAction(ContainerInterface $container, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository) : Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $utilisateurRepository = $em->getRepository('App:Utilisateur');
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $this->getClient($utilisateurRepository);
+        $param = $this->getParameter('id');
+        $utilisateur = $container->get('utilisateur')->getClient($param, $utilisateurRepository);
+
         if (!$utilisateur)
         {
             $this->addFlash('error', 'Seul un Client peut acheter les produits de son panier');
@@ -215,41 +199,5 @@ class ProduitController extends AbstractController
         $em->flush();
         return $this->redirectToRoute('panier');
     }
-
-
-
-
-    public function getAdmin($utilisateurRepository)
-    {
-        $param = $this->getParameter('id');
-        $utilisateur = $utilisateurRepository->find($param);
-
-        if (!$utilisateur || !$utilisateur->getStatus())
-            return false;
-        else
-            return $utilisateur;
-
-    }
-
-    public function getClient($utilisateurRepository)
-    {
-        $param = $this->getParameter('id');
-        $utilisateur = $utilisateurRepository->find($param);
-
-        if (!$utilisateur || $utilisateur->getStatus())
-            return false;
-        else
-            return $utilisateur;
-
-    }
-
-    public function getAnonyme($utilisateurRepository)
-    {
-        $param = $this->getParameter('id');
-        $utilisateur = $utilisateurRepository->find($param);
-
-        return !$utilisateur;
-    }
-
 
 }
