@@ -81,3 +81,9 @@ class Panier
         return $this;
     }
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

@@ -5,8 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Panier;
 use App\Form\UtilisateurType;
+use App\Repository\PanierRepository;
 use App\Repository\ProduitRepository;
-use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Controller pour les actions qui concernent un utilisateur authentifié (Client).
+ */
 class ClientController extends AbstractController
 {
 
@@ -38,7 +41,7 @@ class ClientController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid())
         {
-            $utilisateur->setStatus(false);
+            $utilisateur->setStatus(false); // en cas de faille XSS
             $utilisateur->setMotDePasse(sha1($utilisateur->getMotDePasse()));
             $em->flush();
             $this->addFlash('success', 'Profil modifié avec succès');
@@ -66,9 +69,11 @@ class ClientController extends AbstractController
 
         $produits = $produitRepository->findAll();
 
+        // récupérer le tableau $_POST[produit] et verifier qu'il n'est pas vide (formulaire posté)
         $post = $request->request->get('produit');
         if ($post)
         {
+            // ne récupérer que les produits avec une quantité supérieur à 0
             $produitsAchetes = array_filter($post, function ($data) { return $data > 0; });
             $panierRepository = $em->getRepository('App:Panier');
             foreach ($produitsAchetes as $key => $value)
@@ -77,11 +82,13 @@ class ClientController extends AbstractController
                 $currentProduit = $produitRepository->find($key);
                 $currentProduit->setQuantite($currentProduit->getQuantite() - $value);
                 // ajouter au panier
+
+                // chercher le produit dans la panier (si il existe déjà)
                 $produitPanier =  $panierRepository->findOneBy([
                     'produit' => $currentProduit,
                     'utilisateur' => $utilisateur
                 ]);
-                // si le produit n'est pas dans le panier on
+                // si le produit n'est pas dans le panier on l'ajoute
                 if(!$produitPanier)
                 {
                     $panier = new Panier();
@@ -90,14 +97,14 @@ class ClientController extends AbstractController
                     $panier->setQuantite($value);
                     $em->persist($panier);
                 }
+                // sinon on ajoute la quantité seulement
                 else
                 {
                     $produitPanier->setQuantite($produitPanier->getQuantite() + $value);
                 }
-                $em->flush();
-
             }
-
+            // MAJ de la base de données
+            $em->flush();
         }
         return $this->render('niveau3/magasin.html.twig', ['produits' => $produits]);
     }
@@ -120,9 +127,12 @@ class ClientController extends AbstractController
     }
 
     /**
-     * @Route ("/retirerProduit/{id}", name="retirerProduit")
+     * @Route ("/retirerProduit/{id}",
+     *     name="retirerProduit",
+     *     requirements={ "id" : "\d+" }
+     * )
      */
-    public function retirerProduitAction($id, ContainerInterface $container, EntityManagerInterface $em) : Response
+    public function retirerProduitAction($id, ContainerInterface $container, EntityManagerInterface $em, PanierRepository $panierRepository) : Response
     {
         $utilisateur = $container->get('utilisateur')->getClient();
 
@@ -132,9 +142,9 @@ class ClientController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        $panierRepository = $em->getRepository('App:Panier');
         $panier = $panierRepository->find($id);
         $produit = $panier->getProduit();
+        // remettre à jour la quantite du produit pour le magasin
         $produit->setQuantite($produit->getQuantite() + $panier->getQuantite());
 
         $em->remove($panier);
@@ -191,3 +201,9 @@ class ClientController extends AbstractController
     }
 
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

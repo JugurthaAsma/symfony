@@ -10,7 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
+/**
+ * Controller qui regroupe toutes les méthodes/actions en commun des autres controllers
+ */
 class UtilisateurController extends AbstractController
 {
     public function headerAction(): Response
@@ -45,7 +47,7 @@ class UtilisateurController extends AbstractController
     /**
      * @Route("/", name="accueil")
      */
-    public function homeAction(UtilisateurRepository $utilisateurRepository): Response
+    public function accueilAction(UtilisateurRepository $utilisateurRepository): Response
     {
         $param = $this->getParameter('id');
         $utilisateur = $utilisateurRepository->find($param);
@@ -80,6 +82,14 @@ class UtilisateurController extends AbstractController
     }
 
 
+    /**
+     * Méthodes à utiliser comme service pour savoir dans les autres controllers si on est :
+     * - non authentifié (utilisateur non trouvé dans la base de données)
+     * - authentifié client
+     * - authentifié administrateur
+     *
+     */
+
     public function getAdmin()
     {
         $utilisateur = $this->getUtilisateur();
@@ -97,6 +107,7 @@ class UtilisateurController extends AbstractController
         return !$this->getUtilisateur();
     }
 
+    // l'utilisateur actuellement loggué
     private function getUtilisateur() : ?Utilisateur
     {
         $param = $this->getParameter('id');
@@ -104,5 +115,10 @@ class UtilisateurController extends AbstractController
         return $utilisateurRepository->find($param);
     }
 
-
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

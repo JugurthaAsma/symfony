@@ -4,7 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    id: 2
+    id: 7
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +30,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # utiliser le classe 'UtilisateurController' comme service pour exporter ses fonctions
     utilisateur:
         class: App\Controller\UtilisateurController
 

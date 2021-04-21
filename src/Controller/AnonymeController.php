@@ -15,7 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
+/**
+ * Controller pour les actions qui concernent un utilisateur non authentifié (Anonyme).
+ */
 class AnonymeController extends AbstractController
 {
     /**
@@ -51,7 +53,7 @@ class AnonymeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $utilisateur->setStatus(false); // obligatoirement un compte client (faille XSS)
+            $utilisateur->setStatus(false); // obligatoirement un compte client (éviter les faille XSS)
             $utilisateur->setMotDePasse(sha1($utilisateur->getMotDePasse()));
             $em->persist($utilisateur);
             $em->flush();
@@ -68,3 +70,9 @@ class AnonymeController extends AbstractController
     }
 
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

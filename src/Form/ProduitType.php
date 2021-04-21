@@ -16,11 +16,11 @@ class ProduitType extends AbstractType
     {
         $builder
             ->add('libelle', TextType::class,
-                ['label' => 'libelle du produit', 'attr' => ['placeholder' =>'libelle']])
+                ['label' => 'libelle', 'attr' => ['placeholder' =>'libelle du produit']])
             ->add('prix', NumberType::class,
-                ['label' => 'prix du produit', 'attr' => ['placeholder' =>'prix']])
+                ['label' => 'prix', 'attr' => ['placeholder' =>'prix du produit']])
             ->add('quantite', IntegerType::class,
-                ['label' => 'quantité du produit', 'attr' => ['placeholder' =>'quantité']])
+                ['label' => 'quantité', 'attr' => ['placeholder' =>'quantité du produit']])
         ;
     }
 
@@ -31,3 +31,9 @@ class ProduitType extends AbstractType
         ]);
     }
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

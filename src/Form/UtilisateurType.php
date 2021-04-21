@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\Utilisateur;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
@@ -18,19 +17,19 @@ class UtilisateurType extends AbstractType
     {
         $builder
             ->add('login', TextType::class,
-                ['label' => 'login', 'attr' => ['placeholder' =>'login']])
+                ['label' => 'login'])
 
             ->add('motDePasse', PasswordType::class,
-                ['label' => 'mot de passe', 'attr' => ['placeholder' =>'mot de passe']])
+                ['label' => 'mot de passe'])
 
             ->add('nom', TextType::class,
-                ['label' => 'nom', 'attr' => ['placeholder' =>'nom']])
+                ['label' => 'nom'])
 
             ->add('prenom', TextType::class,
-                ['label' => 'prenom', 'attr' => ['placeholder' =>'prenom']])
+                ['label' => 'prenom'])
 
             ->add('dateDeNaissance', BirthdayType::class,
-                ['label' => 'date de naissance', 'attr' => ['placeholder' =>'date de naissance']])
+                ['label' => 'date de naissance'])
 
             ->add('status', CheckboxType::class,
                 ['label' => 'status']);
@@ -44,3 +43,9 @@ class UtilisateurType extends AbstractType
         ]);
     }
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

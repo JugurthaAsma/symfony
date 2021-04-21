@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
+/**
+ * Controller pour les actions qui concernent un administrateur.
+ */
 class AdminController extends AbstractController
 {
     /**
@@ -21,9 +25,10 @@ class AdminController extends AbstractController
      */
     public function gererUtilisateursAction(ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
     {
+        // Savoir si on est admin (utilisation du service)
         $utilisateur = $container->get('utilisateur')->getAdmin();
 
-        if (!$utilisateur)
+        if (!$utilisateur) // si on n'est pas admin
         {
             $this->addFlash('error', 'Seul un administrateur peut gérer les utilisateur');
             return $this->redirectToRoute('accueil');
@@ -34,7 +39,10 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route ("/supprimerUtilisateur/{id}", name="supprimerUtilisateur")
+     * @Route ("/supprimerUtilisateur/{id}",
+     *     name="supprimerUtilisateur",
+     *     requirements={ "id" : "\d+" }
+     * )
      */
     public function supprimerUtilisateurAction($id, EntityManagerInterface $em, ContainerInterface $container, UtilisateurRepository $utilisateurRepository) : Response
     {
@@ -47,7 +55,11 @@ class AdminController extends AbstractController
         }
 
         $utilisateurSupprime = $utilisateurRepository->find($id);
-        if ($utilisateurSupprime == $utilisateur)
+        if ($utilisateurSupprime == null)
+        {
+            $this->addFlash('error', 'L\'utilisateur nº '. $id .' n\'existe pas');
+        }
+        elseif ($utilisateurSupprime === $utilisateur)
         {
             $this->addFlash('error', 'Impossible de supprimer l\'utilisateur loggué');
         }
@@ -72,7 +84,7 @@ class AdminController extends AbstractController
     /**
      * @Route ("/ajouter", name="produit_ajouter")
      */
-    public function ajouterAction(EntityManagerInterface $em, ContainerInterface $container, UtilisateurRepository $utilisateurRepository, Request $request):Response
+    public function ajouterAction(EntityManagerInterface $em, ContainerInterface $container, Request $request):Response
     {
         $utilisateur = $container->get('utilisateur')->getAdmin();
 
@@ -102,3 +114,9 @@ class AdminController extends AbstractController
         return $this->render('niveau3/ajout.html.twig', $args);
     }
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

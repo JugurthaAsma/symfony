@@ -48,3 +48,9 @@ class ProduitRepository extends ServiceEntityRepository
     }
     */
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

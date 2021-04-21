@@ -119,3 +119,9 @@ class Produit
         return $this;
     }
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */

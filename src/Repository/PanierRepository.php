@@ -48,3 +48,9 @@ class PanierRepository extends ServiceEntityRepository
     }
     */
 }
+
+/**
+ * @author
+ * ASMA Jugurtha
+ * BOUDAHBA Hylia
+ */
