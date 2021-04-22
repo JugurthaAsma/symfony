@@ -197,6 +197,7 @@ class ClientController extends AbstractController
             $em->remove($panier);
 
         $em->flush();
+        $this->addFlash('success', 'Votre commande a été passé avec succès');
         return $this->redirectToRoute('panier');
     }
 
